@@ -6,14 +6,15 @@
 
 export as namespace Microstates;
 
-export type Constructor<T> = new(...args: any[]) => T;
+export interface Microstate<T,V> {
+  initialize(): T
+  initialize(v: V): T
 
-export interface Microstate {
-  set(): Microstate
-  set(value: any): Microstate
+  set(): T
+  set(value: V): T
 }
 
-export interface NumberType extends Microstate {
+export interface NumberType extends Microstate<NumberType, Number> {
   increment(): NumberType
   increment(step: Number): NumberType
 
@@ -21,15 +22,17 @@ export interface NumberType extends Microstate {
   decrement(step: Number): NumberType
 }
 
-export interface StringType extends Microstate {
+export interface StringType extends Microstate<StringType, String> {
   concat(): StringType
   concat(str: String): StringType
 }
 
-export function create<Number>(Type: typeof Number, value?: Number): NumberType 
+export function create<Number>(Type: typeof Number, value?: Number): NumberType
 export function create<String>(Type: typeof String, value?: String): StringType
-export function create<T extends Constructor<T>>(Type: T, value?: any): T;
+export function create<T,V>(Type: new(...args: any[]) => T, value?: V): MappedToRoot<T, T>
 
-// export type FromValue<T> = T extends (value: infer U) => any ? U : any;
+export type MappedToRoot<R,T> = {
+  [M in keyof T]: T[M] extends NumberType ? T[M] : R
+}
+ 
 
-// export function from<T>(value: any): FromValue<T>
