@@ -27,31 +27,32 @@ export interface StringType extends FieldType<StringType, String> {
   concat(str: String): StringType;
 }
 
-export interface Root {}
+type TConstructor<T> = new (...args: any[]) => T;
+type TFunc<T> = (...args: any[]) => T;
 
 export function create<Number>(Type: typeof Number, value?: Number): NumberType;
 export function create<String>(Type: typeof String, value?: String): StringType;
 export function create<T, V>(
-  Type: new (...args: any[]) => T,
+  Type: TConstructor<T>,
   value?: V
-): MappedToRoot<T>;
+): Contextualize<T>;
 
-export type AllReturnRoot<R, T> = {
-  [M in keyof T]: T[M] extends Function ? (...args: any[]) => R : R
+// for every property on T, define it as returning R
+// the conditional is so that function are typed as
+// functions returning R, instead of the property itself being of type R
+export type Rooted<R, T> = {
+  [M in keyof T]: T[M] extends Function ? TFunc<R> : R
 };
 
-// export type MappedToRoot<R, T> = {
-//   [M in keyof T]: T[M] extends String
-//     ? AllReturnRoot<R, T[M]>
-//     : MappedToRoot<R, R>
-// };
-
-// export type MappedToRoot<R, T> = {
-//   [M in keyof T]: T[M] extends Function ? () => R : AllReturnRoot<R, T[M]>
-// };
-
-export type MappedToRoot<R> = {
+export type Contextualize<R> = {
+  // for every property on type R(which is root)
   [M in keyof R]: R[M] extends (NumberType | StringType)
-    ? AllReturnRoot<MappedToRoot<R>, R[M]>
-    : (R[M] extends Function ? (...args: any[]) => MappedToRoot<R> : R[M])
+    ? Rooted<Contextualize<R>, R[M]>
+    : (R[M] extends Function
+        ? (...args: InferArgs<R[M]>) => Contextualize<R>
+        : R[M])
 };
+
+export type InferArgs<T> = T extends (...args: infer U) => any ? U : any;
+
+export type ThisWrap<T> = Contextualize<T>;
