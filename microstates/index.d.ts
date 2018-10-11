@@ -55,4 +55,4 @@ export type Contextualize<R> = {
 
 export type InferArgs<T> = T extends (...args: infer U) => any ? U : any;
 
-export type ThisWrap<T> = Contextualize<T>;
+export type of<T> = Contextualize<T>;

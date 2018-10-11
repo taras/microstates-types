@@ -28,19 +28,9 @@ class Person {
   age = Microstates.create(Number);
   briefcase = Microstates.create(Briefcase);
 
-  goUnderCover(this: Microstates.ThisWrap<Person>, name: string, age: number) {
-    // let self: Microstates.MappedToRoot<Person> = Microstates.MappedToRoot<
-    //   Person
-    // >(this);
-    // let foo = Microstates.wrapped(this as Person);
-    // let foo = Microstates.wrapped(this)
+  goUnderCover(this: Microstates.of<Person>, name: string, age: number) {
     return this.age.set(age).firstName.set(name);
   }
-
-  // wrapped() {
-  //   // @ts-ignore
-  //   return Microstates.wrapped(this)
-  // }
 }
 
 let person = Microstates.create(Person, {});
